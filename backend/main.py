@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain_ollama import ChatOllama
-from langchain_community.tools import DuckDuckGoSearchRun
+# from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_community.tools.wikipedia.tool import WikipediaQueryRun
 from langchain_community.utilities.wikipedia import WikipediaAPIWrapper
 from langgraph.graph import StateGraph, START, END
@@ -33,7 +33,16 @@ MODEL_NAME = os.getenv("OLLAMA_MODEL")
 llm = ChatOllama(model=MODEL_NAME, temperature=0.7)
 
 # Search Tools
-search_tool = DuckDuckGoSearchRun()
+from duckduckgo_search import DDGS
+class CustomDDGS:
+    def invoke(self, kwargs):
+        try:
+            with DDGS() as ddgs:
+                return str(list(ddgs.text(kwargs.get("query", ""), max_results=2)))
+        except Exception as e:
+            return str(e)
+
+search_tool = CustomDDGS()
 wiki_wrapper = WikipediaAPIWrapper(top_k_results=1, doc_content_chars_max=1000)
 wiki_tool = WikipediaQueryRun(api_wrapper=wiki_wrapper)
 
