@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# IdeaXCoder Frontend
 
-## Getting Started
+Welcome to the frontend application for **IdeaXCoder**, an agentic AI coding interface designed to act as your technical architect.
 
-First, run the development server:
+## 🚀 Tech Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Framework:** [Next.js](https://nextjs.org)
+- **Styling:** Vanilla CSS (Modern Black & White Theme)
+- **Animations:** [Framer Motion](https://www.framer.com/motion/)
+- **3D Visuals:** [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🧠 Project Context
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+This frontend interacts deeply with a Python/FastAPI backend using LangGraph to process your project ideas. The platform captures user requirements via multiple interactive chat interfaces, performs background web search/wiki research, and generates structured technical specifications.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+For rules and agent-specific contexts, please review:
+- [Agents Guidelines](../AGENTS.md) 
+- [Claude Context](../CLAUDE.md)
+- [Gemini Context](../GEMINI.md)
 
-## Learn More
+## 💻 Step-by-Step Setup Instructions
 
-To learn more about Next.js, take a look at the following resources:
+Follow these steps to fully configure and run both the backend architecture and frontend UI.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 1. Prerequisites
+- **Node.js**: (Version 18+ recommended)
+- **Python**: (Version 3.10+ recommended)
+- **Ollama**: Install [Ollama](https://ollama.com/) locally to run LLM models. Ensure you pull the required model (e.g., `ollama pull llama3`) so the local agent can utilize it.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 2. Environment Configuration (.env)
+Create the necessary environment variables before running either application:
+1. **Frontend**: In the `frontend` directory, create a `.env.local` file:
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:8000
+   ```
+2. **Backend**: Create a `.env` file located in the root project directory (or within `backend`) and explicitly define the `OLLAMA_MODEL` variable. The `backend/main.py` relies on this to route LLM requests properly:
+   ```env
+   OLLAMA_MODEL=llama3
+   ```
 
-## Deploy on Vercel
+### 3. Backend Setup
+Since the frontend relies heavily on API interactions with the Python backend, start by setting it up:
+1. Open a terminal in the root project directory (`IdeaXCoder`).
+2. Create and activate a Python virtual environment:
+   ```bash
+   python -m venv .venv
+   # Windows:
+   .venv\Scripts\activate
+   # Mac/Linux:
+   source .venv/bin/activate
+   ```
+3. Install backend dependencies (if applicable):
+   ```bash
+   pip install -r backend/requirements.txt
+   ```
+4. Run the FastAPI server:
+   ```bash
+   # From the root directory:
+   uvicorn backend.main:app --reload --port 8000
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 4. Frontend Setup
+Now, start the Next.js visual renderer:
+1. Open up a second terminal and navigate to the `frontend` directory:
+   ```bash
+   cd frontend
+   ```
+2. Install all Node dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the Next.js development server:
+   ```bash
+   npm run dev
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 5. Verify the Application
+- Open [http://localhost:3000](http://localhost:3000) with your browser to view the Next.js frontend UI.
+- The UI should now be successfully communicating with the FastAPI backend at `http://localhost:8000`.
+
+You can freely begin editing the view layer by modifying `app/page.tsx`. Changes will auto-update in your browser.
+
+## 🌐 API Interaction
+
+The frontend is configured to interface directly with the FastAPI backend. It utilizes AI capabilities via Ollama and orchestrates human-in-the-loop flows natively within the UI components.
