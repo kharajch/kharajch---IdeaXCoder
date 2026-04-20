@@ -163,10 +163,20 @@ workflow_with_human.add_node("search_and_formulate", search_and_formulate_node)
 workflow_with_human.add_node("process_feedback", process_feedback_node)
 
 workflow_with_human.add_edge(START, "search_and_formulate")
-workflow_with_human.add_edge("process_feedback", END)
+
+def route_feedback(state: AppState):
+    if state.get("is_satisfactory"):
+        return END
+    return "process_feedback"
+
+workflow_with_human.add_conditional_edges("search_and_formulate", route_feedback)
+workflow_with_human.add_conditional_edges("process_feedback", route_feedback)
 
 memory = MemorySaver()
-app_graph = workflow_with_human.compile(checkpointer=memory, interrupt_after=["search_and_formulate"])
+app_graph = workflow_with_human.compile(
+    checkpointer=memory, 
+    interrupt_after=["search_and_formulate", "process_feedback"]
+)
 
 class ResearchRequest(BaseModel):
     problem_statement: str
@@ -213,15 +223,17 @@ async def feedback_api(req: FeedbackRequest):
     # Update State with feedback
     app_graph.update_state(config, {"feedback": req.feedback, "is_satisfactory": req.is_satisfactory})
     
+    # Resume the graph
+    app_graph.invoke(None, config=config)
+    state = app_graph.get_state(config).values
+    
     if req.is_satisfactory:
         return {
             "status": "completed",
-            "spec": app_graph.get_state(config).values.get("spec")
+            "spec": state.get("spec"),
+            "think_log": ["User approved the specification. Finishing process."]
         }
     else:
-        # Resume the graph
-        app_graph.invoke(None, config=config)
-        state = app_graph.get_state(config).values
         return {
             "status": "pending_feedback",
             "spec": state.get("spec"),
