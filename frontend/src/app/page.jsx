@@ -12,7 +12,7 @@ const API_URL = "http://localhost:8000";
 
 // --- 3D Background Component ---
 function Background3D() {
-  const meshRef = useRef<any>();
+  const meshRef = useRef(null);
   useFrame((state, delta) => {
     if (meshRef.current) {
       meshRef.current.rotation.x += delta * 0.2;
@@ -46,14 +46,14 @@ export default function IdeaXCoder() {
 
   // Flow State
   const [isEvaluating, setIsEvaluating] = useState(false);
-  const [threadId, setThreadId] = useState<string | null>(null);
-  const [logs, setLogs] = useState<string[]>([]);
-  const [currentSpec, setCurrentSpec] = useState<any>(null);
+  const [threadId, setThreadId] = useState(null);
+  const [logs, setLogs] = useState([]);
+  const [currentSpec, setCurrentSpec] = useState(null);
   const [pendingFeedback, setPendingFeedback] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState("");
   
   // History State
-  const [history, setHistory] = useState<any[]>([]);
+  const [history, setHistory] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Storage Effect
@@ -66,13 +66,13 @@ export default function IdeaXCoder() {
     }
   }, []);
 
-  const saveHistory = (newEntry: any) => {
+  const saveHistory = (newEntry) => {
     const nextH = [newEntry, ...history];
     setHistory(nextH);
     localStorage.setItem("ideaxcoder_history", JSON.stringify(nextH));
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -88,14 +88,14 @@ export default function IdeaXCoder() {
         setCurrentSpec(res.data.spec);
         setPendingFeedback(true);
       }
-    } catch (err: any) {
+    } catch (err) {
       setLogs((prev) => [...prev, `ERROR: ${err.message}`]);
     } finally {
       setIsEvaluating(false);
     }
   };
 
-  const submitFeedback = async (isSatisfactory: boolean) => {
+  const submitFeedback = async (isSatisfactory) => {
     if (!threadId) return;
     setIsEvaluating(true);
     setLogs((prev) => [...prev, isSatisfactory ? "Approving Spec..." : "Submitting Feedback..."]);
@@ -124,7 +124,7 @@ export default function IdeaXCoder() {
         // Still pending
         setFeedbackMsg("");
       }
-    } catch (err: any) {
+    } catch (err) {
       setLogs((prev) => [...prev, `ERROR: ${err.message}`]);
     } finally {
       setIsEvaluating(false);
@@ -291,10 +291,10 @@ export default function IdeaXCoder() {
           
           <div style={{ flex: 1 }}>
             {logs.map((log, i) => (
-              <div key={i} className="log-entry">> {log}</div>
+              <div key={i} className="log-entry">&gt; {log}</div>
             ))}
             
-            {isEvaluating && <div className="log-entry pulse">> Processing...</div>}
+            {isEvaluating && <div className="log-entry pulse">&gt; Processing...</div>}
           </div>
 
           {currentSpec && (

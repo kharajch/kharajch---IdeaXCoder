@@ -29,7 +29,7 @@ app.add_middleware(
 
 # LLM Config
 # Ensure you have 'llama3' (or switch to 'mistral', etc.) pulled via 'ollama run llama3'
-MODEL_NAME = os.getenv("OLLAMA_MODEL", "llama3")
+MODEL_NAME = os.getenv("OLLAMA_MODEL")
 llm = ChatOllama(model=MODEL_NAME, temperature=0.7)
 
 # Search Tools
