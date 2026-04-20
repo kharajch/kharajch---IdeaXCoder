@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="public/logo.png" alt="IdeaXCoder Logo" width="200" />
+</p>
+
 # IdeaXCoder Frontend
 
 Welcome to the frontend application for **IdeaXCoder**, an agentic AI coding interface designed to act as your technical architect.
@@ -79,6 +83,15 @@ Now, start the Next.js visual renderer:
 - The UI should now be successfully communicating with the FastAPI backend at `http://localhost:8000`.
 
 You can freely begin editing the view layer by modifying `app/page.tsx`. Changes will auto-update in your browser.
+
+## 🎨 Branding
+
+The **IdeaXCoder** branding is inspired by **Architectural Brutalism** and the **Digital Sculptor** creative north star (via Stitch).
+
+| Asset | Description | Path |
+| :--- | :--- | :--- |
+| **Logo** | A structural, monochromatic representation of AI and architecture. | `public/logo.png` |
+| **Favicon** | A simplified geometric symbol for browser tabs. | `public/favicon.png` |
 
 ## 🌐 API Interaction
 
