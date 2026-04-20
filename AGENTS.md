@@ -1,16 +1,19 @@
 # IdeaXCoder Project Context (Agents)
-The backend architecture resides in `backend/main.py` and connects to Ollama alongside Web Search Tools and Wikipedia search agents. Agent state is strictly configured within an AppState typing dict in Python.
+The backend architecture resides in `backend/main.py` and connects to Ollama alongside Web Search Tools and Wikipedia search agents. Agent state is strictly managed using an `AppState` TypedDict in Python, ensuring persistent context throughout the architectural planning process.
 
 ## Agent Architecture & Workflow
-- **LangGraph Integration:** Processes project ideas and coordinates agent tasks.
-- **Research Capabilities:** Utilizes Web Search and Wikipedia search agents to gather context.
-- **Technical Specifications:** Generates structured technical specifications based on gathered user requirements.
-- **Human-in-the-Loop:** Incorporates ongoing feedback to iteratively refine output and architecture plans.
-- **Environment Configuration:** The backend explicitly requires `OLLAMA_MODEL` (e.g., `OLLAMA_MODEL=llama3`) to be defined in a `.env` file to correctly route requests to the locally running model.
+- **LangGraph Integration:** Orchestrates the flow between requirement gathering, research, and specification generation.
+- **Research Capabilities:** Employs specialized agents to crawl the web and Wikipedia for technical documentation and best practices.
+- **Architect Core:** Synthesizes gathered data into comprehensive, structured technical specifications (Blueprints).
+- **Human-in-the-Loop:** Pause/Resume capability allows users to refine the agent's direction before moving to the next phase.
+- **Environment Configuration:** Requires `OLLAMA_MODEL` (e.g., `OLLAMA_MODEL="nemotron-mini:latest"`) in the root `.env` file to correctly route requests to the local inference engine.
+
+---
 
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+This project uses Next.js (App Router) integrated directly at the root. File structure and API conventions are critical—refer to `src/app` for visual logic. Heed deprecation notices and adhere to the strict Vanilla CSS styling rules.
 <!-- END:nextjs-agent-rules -->
+
 

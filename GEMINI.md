@@ -1,8 +1,12 @@
 # IdeaXCoder Project Context (Gemini)
-This is an agentic AI coding interface that leverages LangGraph and FastApi to structure inputs and produce architecture plans. Data models and flows use Pydantic models with LLM inferences utilizing Ollama.
-Use Next.js with vanilla CSS to edit views.
+This is an agentic AI coding interface that leverages LangGraph and FastAPI to structure inputs and produce detailed architecture plans. Data models and state transitions are validated using Pydantic, ensuring rigorous technical accuracy from idea to spec.
 
 ## Core Objectives
-- **Technical Architect Scope:** Serve as a comprehensive AI-powered application that guides users from idea to structured specifications.
-- **Full-Stack Integration:** Ensure seamless interaction between the Next.js frontend and the Python/FastAPI backend. This requires explicitly defining environment variables: `.env.local` for the frontend (`NEXT_PUBLIC_API_URL`) and `.env` for the backend (`OLLAMA_MODEL`).
-- **Iterative Refinement:** Rely on Pydantic models to validate inputs and integrate human-in-the-loop feedback.
+- **Technical Architect Scope:** Transform user-provided ideas into production-ready **Architectural Blueprints**.
+- **Root-Level Integration:** Manage the seamless interaction between the root Next.js frontend and the `backend/` FastAPI server.
+- **Full-Stack Environment:** Maintain `.env.local` (Frontend) and `.env` (Backend) in the root directory for orchestration.
+- **Iterative Refinement:** Utilize Human-in-the-Loop checkpoints to allow user feedback during the graph execution.
+- **Model Orchestration:** Defaults to `nemotron-mini:latest` via Ollama for lightweight, high-speed local inference.
+
+---
+

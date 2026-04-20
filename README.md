@@ -2,119 +2,129 @@
   <img src="public/logo.png" alt="IdeaXCoder Logo" width="200" />
 </p>
 
-# IdeaXCoder Frontend
+# IdeaXCoder: Agentic AI Technical Architect
 
-Welcome to the frontend application for **IdeaXCoder**, an agentic AI coding interface designed to act as your technical architect.
+**IdeaXCoder** is a sophisticated agentic AI coding interface designed to transform abstract project ideas into structured technical specifications. Built with a modern Next.js frontend and a powerful FastAPI/LangGraph backend, it orchestrates complex workflows involving research, architectural planning, and human-in-the-loop refinement.
+
+---
+
+## ✨ Features
+
+- **Agentic Workflow:** Powered by [LangGraph](https://www.langchain.com/langgraph), coordinating multiple specialized agents.
+- **Deep Research:** Integrates Web Search and Wikipedia agents to gather context and technical requirements.
+- **Human-in-the-Loop:** Interactive feedback cycles to ensure the generated architecture aligns perfectly with your vision.
+- **Local LLM Integration:** Optimized for [Ollama](https://ollama.com/), giving you full control over your privacy and model selection.
+- **Modern UI/UX:** A premium, "Digital Sculptor" inspired interface featuring 3D visuals and monochromatic brutalist aesthetics.
+
+---
 
 ## 🚀 Tech Stack
 
-- **Framework:** [Next.js](https://nextjs.org)
-- **Styling:** Vanilla CSS (Modern Black & White Theme)
+### Frontend
+- **Framework:** [Next.js](https://nextjs.org) (App Router)
+- **Styling:** Vanilla CSS (Glassmorphism & Brutalist aesthetics)
 - **Animations:** [Framer Motion](https://www.framer.com/motion/)
 - **3D Visuals:** [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
 
-## 🧠 Project Context
+### Backend
+- **Framework:** [FastAPI](https://fastapi.tiangolo.com/)
+- **Orchestration:** [LangGraph](https://www.langchain.com/langgraph)
+- **Intelligence:** [Ollama](https://ollama.com/) (Local LLMs)
+- **Search Agents:** DuckDuckGo & Wikipedia integrations
 
-This frontend interacts deeply with a Python/FastAPI backend using LangGraph to process your project ideas. The platform captures user requirements via multiple interactive chat interfaces, performs background web search/wiki research, and generates structured technical specifications.
+---
 
-For rules and agent-specific contexts, please review:
+## 🧠 Project Documentation
 
-- [Agents Guidelines](../AGENTS.md)
-- [Claude Context](../CLAUDE.md)
-- [Gemini Context](../GEMINI.md)
+For detailed rules and agent-specific contexts, please review:
 
-## 💻 Step-by-Step Setup Instructions
+- [Agents Guidelines](AGENTS.md) - Workflow and state management logic.
+- [Gemini Context](GEMINI.md) - Coding standards and tech stack requirements.
+- [Claude Context](CLAUDE.md) - UI design principles and project goals.
 
-Follow these steps to fully configure and run both the backend architecture and frontend UI.
+---
+
+## 💻 Step-by-Step Setup
+
+Follow these steps to configure and run the full IdeaXCoder ecosystem.
 
 ### 1. Prerequisites
 
 - **Node.js**: (Version 18+ recommended)
 - **Python**: (Version 3.10+ recommended)
-- **Ollama**: Install [Ollama](https://ollama.com/) locally to run LLM models. Ensure you pull the required model (e.g., `ollama pull llama3`) so the local agent can utilize it.
+- **Ollama**: [Download & Install](https://ollama.com/).
+  ```bash
+  ollama pull nemotron-mini:latest  # Or your preferred model
+  ```
 
-### 2. Environment Configuration (.env)
+### 2. Environment Configuration
 
-Create the necessary environment variables before running either application:
+Create the following environment files in the **root project directory**:
 
-1. **Frontend**: In the `frontend` directory, create a `.env.local` file:
+#### `.env` (Backend Configuration)
+```env
+OLLAMA_MODEL="nemotron-mini:latest"
+```
 
-   ```env
-   NEXT_PUBLIC_API_URL=http://localhost:8000
-   ```
-
-2. **Backend**: Create a `.env` file located in the root project directory (or within `backend`) and explicitly define the `OLLAMA_MODEL` variable. The `backend/main.py` relies on this to route LLM requests properly:
-
-   ```env
-   OLLAMA_MODEL=llama3
-   ```
+#### `.env.local` (Frontend Configuration)
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
 ### 3. Backend Setup
 
-Since the frontend relies heavily on API interactions with the Python backend, start by setting it up:
+The backend handles the agentic logic and API requests.
 
-1. Open a terminal in the root project directory (`IdeaXCoder`).
-2. Create and activate a Python virtual environment:
-
+1. Open a terminal in the root directory.
+2. Initialize and activate the virtual environment:
    ```bash
-   python -m venv .venv
    # Windows:
-   .venv\Scripts\activate
+   .\venv\Scripts\activate
    # Mac/Linux:
-   source .venv/bin/activate
+   source venv/bin/activate
    ```
-
-3. Install backend dependencies (if applicable):
-
+3. Install dependencies:
    ```bash
-   pip install -r backend/requirements.txt
+   pip install -r requirements.txt
    ```
-
-4. Run the FastAPI server:
-
+4. Start the FastAPI server:
    ```bash
-   # From the root directory:
    uvicorn backend.main:app --reload --port 8000
    ```
 
 ### 4. Frontend Setup
 
-Now, start the Next.js visual renderer:
+The frontend provides the interactive 3D command center.
 
-1. Open up a second terminal and navigate to the `frontend` directory:
-
-   ```bash
-   cd frontend
-   ```
-
-2. Install all Node dependencies:
-
+1. Open a **new** terminal in the root directory.
+2. Install Node dependencies:
    ```bash
    npm install
    ```
-
-3. Start the Next.js development server:
-
+3. Start the development server:
    ```bash
    npm run dev
    ```
 
-### 5. Verify the Application
+### 5. Verify Installation
 
-- Open [http://localhost:3000](http://localhost:3000) with your browser to view the Next.js frontend UI.
-- The UI should now be successfully communicating with the FastAPI backend at `http://localhost:8000`.
+- **Frontend:** Visit [http://localhost:3000](http://localhost:3000)
+- **Backend API:** Visit [http://localhost:8000/docs](http://localhost:8000/docs) (Swagger UI)
 
-You can freely begin editing the view layer by modifying `app/page.tsx`. Changes will auto-update in your browser.
+---
 
-## 🎨 Branding
+## 🎨 Branding & Identity
 
-The **IdeaXCoder** branding is inspired by **Architectural Brutalism** and the **Digital Sculptor** creative north star (via Stitch).
+IdeaXCoder follows a **Digital Sculptor** aesthetic—monochromatic, structured, and premium.
 
 | Asset | Description | Path |
 | :--- | :--- | :--- |
-| **Logo** | A structural, monochromatic representation of AI and architecture. | `public/logo.png` |
-| **Favicon** | A simplified geometric symbol for browser tabs. | `src/app/favicon.ico` |
+| **Logo** | Structural representation of AI architecture. | `public/logo.png` |
+| **Favicon** | Geometric minimalist symbol. | `src/app/favicon.ico` |
 
-## 🌐 API Interaction
+---
 
-The frontend is configured to interface directly with the FastAPI backend. It utilizes AI capabilities via Ollama and orchestrates human-in-the-loop flows natively within the UI components.
+## 🌐 API & Orchestration
+
+The system uses a stateful graph to manage context. Every interaction is validated via Pydantic models, ensuring that the transition from a simple idea to a full technical specification is rigorous and consistent.
+

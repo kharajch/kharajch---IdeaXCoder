@@ -1,8 +1,12 @@
 # IdeaXCoder Project Context (Claude)
-Next.js acts as the primary visual display renderer running in the `frontend` directory. It features a modern black and white theme built exclusively around Vanilla CSS. Framer motion and React Three Fiber are essential libraries to ensure the visual fidelity requirements from the original project specification matching the deep aesthetic instructions.
+Next.js acts as the primary visual display renderer, integrated directly into the project root. The UI follows an **"Architectural Brutalism"** and **"Digital Sculptor"** aesthetic—monochromatic, structured, and premium. It utilizes Vanilla CSS for all styling, combined with Framer Motion and React Three Fiber to create a high-fidelity 3D command center.
 
 ## Frontend Requirements
-- **3D Visualization:** Implement a modern, 3D-visualized UI acting as a technical architect.
-- **User Interfaces:** Build multiple chat interfaces for collecting user requirements seamlessly.
-- **Styling:** Strictly adhere to the premium black and white aesthetic using pure Vanilla CSS.
-- **Environment Configuration:** The frontend requires a `.env.local` file with `NEXT_PUBLIC_API_URL=http://localhost:8000` to correctly point API requests back to the FastAPI server.
+- **3D Command Center:** A technical architect dashboard that feels alive and responsive.
+- **Glassmorphism & Brutalism:** Use high-contrast monochromatic themes with subtle glass effects and bold typography.
+- **Interactive Chat Flows:** Multi-stage interfaces that capture requirements and display agent progress in real-time.
+- **Performance:** Optimized for smooth 3D interactions using React Three Fiber.
+- **Environment Configuration:** Requires `.env.local` in the root with `NEXT_PUBLIC_API_URL=http://localhost:8000`.
+
+---
+
