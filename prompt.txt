@@ -1,0 +1,35 @@
+Before writing any code, read and analyze all three project context files:
+
+1. Read `design.md` — contains the design decisions, architecture, UI/UX guidelines,
+   component structure, and visual/interaction patterns.
+
+2. Read `spec.md` — contains the functional requirements, feature specifications,
+   acceptance criteria, and technical constraints.
+
+3. Read `workflow.png` — a visual diagram of the project workflow. Analyze it carefully
+   to understand the flow of data, user journeys, or system interactions it depicts.
+
+---
+
+Once you have read all three files, do the following BEFORE writing any code:
+
+- Summarize your understanding of:
+    - What the project is and what it does
+    - The key features and requirements (from spec.md)
+    - The architecture and design approach (from design.md)
+    - The workflow or process flow shown in workflow.png
+- Explicitly flag any conflicts, ambiguities, or gaps found across the three files
+- Ask me to confirm or correct your understanding
+
+Only proceed to implementation after I give explicit approval.
+
+---
+
+Implementation Rules:
+- Use spec.md as the source of truth for WHAT to build
+- Use design.md as the source of truth for HOW it should look and behave
+- Use workflow.png as the source of truth for flow, sequencing, and interactions
+- Do not contradict any of the three files
+- Structure the codebase exactly as described across the files
+- Create all necessary files, folders, and configurations
+- If any detail is not covered by the files, use best practices and flag the assumption
