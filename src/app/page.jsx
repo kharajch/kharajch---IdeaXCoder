@@ -57,6 +57,14 @@ export default function IdeaXCoder() {
   // History State
   const [history, setHistory] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const scrollRef = useRef(null);
+
+  // Auto-scroll Thinking Process
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [logs, streamingTokens]);
 
   // Storage Effect
   useEffect(() => {
@@ -337,15 +345,19 @@ export default function IdeaXCoder() {
             <FiCommand /> Thinking Process
           </h3>
           
-          <div style={{ flex: 1, maxHeight: "400px", overflowY: "auto", display: "flex", flexDirection: "column-reverse" }}>
+          <div 
+            ref={scrollRef}
+            style={{ flex: 1, maxHeight: "600px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "12px", paddingRight: "8px" }}
+          >
+            {logs.map((log, i) => (
+              <div key={i} className="log-entry" style={{ whiteSpace: "pre-wrap" }}>&gt; {log}</div>
+            ))}
+            
             {streamingTokens && (
-              <div className="log-entry" style={{ color: "#00ffcc", fontStyle: "italic", borderLeft: "2px solid #00ffcc", paddingLeft: "8px", marginBottom: "8px" }}>
+              <div className="log-entry" style={{ color: "#00ffcc", fontStyle: "italic", borderLeft: "2px solid #00ffcc", paddingLeft: "8px" }}>
                 &gt; {streamingTokens}
               </div>
             )}
-            {logs.slice().reverse().map((log, i) => (
-              <div key={i} className="log-entry">&gt; {log}</div>
-            ))}
             
             {isEvaluating && !streamingTokens && <div className="log-entry pulse">&gt; Processing...</div>}
           </div>

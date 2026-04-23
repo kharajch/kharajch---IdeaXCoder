@@ -145,7 +145,7 @@ async def search_and_formulate_node(state: AppState):
     thought = "Generated initial specification."
     if "<thought>" in full_content and "</thought>" in full_content:
         thought_content = full_content.split("<thought>")[1].split("</thought>")[0].strip()
-        thought = f"Thinking complete: {thought_content[:200]}..."
+        thought = f"Thinking complete: {thought_content}"
 
     return {
         "spec": spec, 
@@ -182,7 +182,7 @@ async def process_feedback_node(state: AppState):
     thought = "Re-generated spec based on feedback."
     if "<thought>" in full_content and "</thought>" in full_content:
         thought_content = full_content.split("<thought>")[1].split("</thought>")[0].strip()
-        thought = f"Thinking complete: {thought_content[:200]}..."
+        thought = f"Thinking complete: {thought_content}"
 
     return {
         "spec": spec,
