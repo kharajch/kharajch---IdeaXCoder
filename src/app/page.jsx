@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, TorusKnot } from "@react-three/drei";
 import Tilt from "react-parallax-tilt";
-import { FiSearch, FiMessageSquare, FiCommand, FiRefreshCw } from "react-icons/fi";
+import { FiSearch, FiMessageSquare, FiCommand, FiRefreshCw, FiCopy, FiCheck, FiX, FiMaximize2 } from "react-icons/fi";
 
 const API_URL = "/api";
 
@@ -51,6 +51,8 @@ export default function IdeaXCoder() {
   const [currentSpec, setCurrentSpec] = useState(null);
   const [pendingFeedback, setPendingFeedback] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState("");
+  const [showFullSpec, setShowFullSpec] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
   
   // History State
   const [history, setHistory] = useState([]);
@@ -168,6 +170,14 @@ export default function IdeaXCoder() {
     }
   };
 
+  const handleCopy = () => {
+    if (!currentSpec) return;
+    const text = JSON.stringify(currentSpec, null, 2);
+    navigator.clipboard.writeText(text);
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
+  };
+
   const startNew = () => {
     setFormData({
       problem_statement: "", solution: "", implementation: "",
@@ -213,7 +223,7 @@ export default function IdeaXCoder() {
             {history
               .filter(h => h.title.toLowerCase().includes(searchQuery.toLowerCase()))
               .map((h, i) => (
-                <div key={i} className="chatbox-card glass-panel" style={{ padding: "12px", cursor: "pointer" }} onClick={() => setCurrentSpec(h.spec)}>
+                <div key={i} className="chatbox-card glass-panel" style={{ padding: "12px", cursor: "pointer" }} onClick={() => { setCurrentSpec(h.spec); setShowFullSpec(true); }}>
                   <p style={{ fontSize: "14px", fontWeight: "bold" }}>{h.title}</p>
                   <p style={{ fontSize: "10px", color: "#888" }}>{new Date(h.timestamp).toLocaleString()}</p>
                 </div>
@@ -341,16 +351,162 @@ export default function IdeaXCoder() {
           </div>
 
           {currentSpec && (
-            <div className="spec-container glass-panel" style={{ marginTop: "16px" }}>
-              <h4 style={{ marginBottom: "8px", color: "white" }}>Current Specification</h4>
-              <div style={{ maxHeight: "400px", overflowY: "auto" }}>
-                <pre style={{ fontSize: "12px" }}>{JSON.stringify(currentSpec, null, 2)}</pre>
+            <div className="spec-container glass-panel" style={{ marginTop: "16px", cursor: "pointer" }} onClick={() => setShowFullSpec(true)}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                <h4 style={{ color: "white" }}>Current Specification</h4>
+                <FiMaximize2 style={{ color: "#888" }} />
               </div>
+              <div style={{ maxHeight: "150px", overflow: "hidden", position: "relative" }}>
+                <pre style={{ fontSize: "10px", opacity: 0.7 }}>{JSON.stringify(currentSpec, null, 2)}</pre>
+                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "40px", background: "linear-gradient(transparent, rgba(25,25,25,0.9))" }}></div>
+              </div>
+              <p style={{ fontSize: "10px", textAlign: "center", marginTop: "4px", color: "#666" }}>Click to expand and copy</p>
             </div>
           )}
 
         </motion.div>
       </div>
+
+      {/* Full Spec Modal */}
+      <AnimatePresence>
+        {showFullSpec && currentSpec && (
+          <motion.div 
+            className="modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div 
+              className="modal-content glass-panel"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+            >
+              <div className="modal-header">
+                <h2>Technical Specification</h2>
+                <div style={{ display: "flex", gap: "12px" }}>
+                  <button onClick={handleCopy} style={{ background: "rgba(255,255,255,0.1)", color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
+                    {copySuccess ? <FiCheck /> : <FiCopy />} {copySuccess ? "Copied!" : "Copy JSON"}
+                  </button>
+                  <button onClick={() => setShowFullSpec(false)} style={{ background: "rgba(255,25,25,0.3)", color: "#fff", padding: "12px" }}>
+                    <FiX />
+                  </button>
+                </div>
+              </div>
+              <div className="modal-body">
+                <div className="spec-grid">
+                  {Object.entries(currentSpec).map(([key, value]) => (
+                    <div key={key} className="spec-section">
+                      <h3>{key.replace(/_/g, ' ').toUpperCase()}</h3>
+                      <div className="spec-value">
+                        {Array.isArray(value) ? (
+                          <ul>
+                            {value.map((item, idx) => <li key={idx}>{item}</li>)}
+                          </ul>
+                        ) : (
+                          <p>{value}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="raw-json">
+                  <h3>Raw JSON</h3>
+                  <pre>{JSON.stringify(currentSpec, null, 2)}</pre>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <style jsx>{`
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0,0,0,0.85);
+          backdrop-filter: blur(8px);
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 40px;
+        }
+        .modal-content {
+          width: 100%;
+          max-width: 1000px;
+          max-height: 90vh;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          background: #111 !important;
+          border: 1px solid #444 !important;
+        }
+        .modal-header {
+          padding: 24px;
+          border-bottom: 1px solid #333;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .modal-body {
+          padding: 24px;
+          overflow-y: auto;
+          flex: 1;
+        }
+        .spec-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+          gap: 24px;
+        }
+        .spec-section h3 {
+          font-size: 12px;
+          color: #888;
+          margin-bottom: 8px;
+          letter-spacing: 1px;
+        }
+        .spec-value {
+          background: rgba(255,255,255,0.03);
+          padding: 16px;
+          border-radius: 8px;
+          border: 1px solid #222;
+        }
+        .spec-value ul {
+          list-style: none;
+        }
+        .spec-value li {
+          margin-bottom: 8px;
+          padding-left: 16px;
+          position: relative;
+        }
+        .spec-value li::before {
+          content: '•';
+          position: absolute;
+          left: 0;
+          color: #00ffcc;
+        }
+        .raw-json {
+          margin-top: 40px;
+          border-top: 1px solid #333;
+          padding-top: 24px;
+        }
+        .raw-json h3 {
+          font-size: 12px;
+          color: #888;
+          margin-bottom: 16px;
+        }
+        .raw-json pre {
+          background: #000;
+          padding: 16px;
+          border-radius: 8px;
+          font-size: 12px;
+          color: #00ffcc;
+          overflow-x: auto;
+        }
+      `}</style>
     </>
   );
 }
