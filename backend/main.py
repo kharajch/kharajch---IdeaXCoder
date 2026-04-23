@@ -18,7 +18,7 @@ from langgraph.checkpoint.memory import MemorySaver
 load_dotenv()
 
 # Setup App
-app = FastAPI(title="IdeaXCoder API")
+app = FastAPI(title="IdeaXCoder API", root_path="/api")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
