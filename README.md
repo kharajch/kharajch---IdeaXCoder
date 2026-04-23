@@ -13,7 +13,7 @@
 - **Agentic Workflow:** Powered by [LangGraph](https://www.langchain.com/langgraph), coordinating multiple specialized agents.
 - **Deep Research:** Integrates Web Search and Wikipedia agents to gather context and technical requirements.
 - **Human-in-the-Loop:** Interactive feedback cycles to ensure the generated architecture aligns perfectly with your vision.
-- **Local LLM Integration:** Optimized for [Ollama](https://ollama.com/), giving you full control over your privacy and model selection.
+- **Local/Cloud LLM Integration:** Optimized for NVIDIA NIM, giving you high-performance inference for architectural planning.
 - **Modern UI/UX:** A premium, "Digital Sculptor" inspired interface featuring 3D visuals and monochromatic brutalist aesthetics.
 
 ---
@@ -29,7 +29,7 @@
 ### Backend
 - **Framework:** [FastAPI](https://fastapi.tiangolo.com/)
 - **Orchestration:** [LangGraph](https://www.langchain.com/langgraph)
-- **Intelligence:** [Ollama](https://ollama.com/) (Local LLMs)
+- **Intelligence:** NVIDIA NIM (meta/llama-3.1-70b-instruct)
 - **Search Agents:** DuckDuckGo & Wikipedia integrations
 
 ---
@@ -52,9 +52,9 @@ Follow these steps to configure and run the full IdeaXCoder ecosystem.
 
 - **Node.js**: (Version 18+ recommended)
 - **Python**: (Version 3.10+ recommended)
-- **Ollama**: [Download & Install](https://ollama.com/).
+- **NVIDIA API Key**: [Obtain from build.nvidia.com](https://build.nvidia.com/).
   ```bash
-  ollama pull nemotron-mini:latest  # Or your preferred model
+  # Ensure you have your key ready for the .env file
   ```
 
 ### 2. Environment Configuration
@@ -63,7 +63,8 @@ Create the following environment files in the **root project directory**:
 
 #### `.env` (Backend Configuration)
 ```env
-OLLAMA_MODEL="nemotron-mini:latest"
+NVIDIA_API_KEY="your-nvapi-key-here"
+NVIDIA_MODEL="meta/llama-3.1-70b-instruct"
 ```
 
 #### `.env.local` (Frontend Configuration)

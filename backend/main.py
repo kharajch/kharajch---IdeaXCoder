@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
-from langchain_ollama import ChatOllama
+from langchain_nvidia_ai_endpoints import ChatNVIDIA
 # from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_community.tools.wikipedia.tool import WikipediaQueryRun
 from langchain_community.utilities.wikipedia import WikipediaAPIWrapper
@@ -28,9 +28,18 @@ app.add_middleware(
 )
 
 # LLM Config
-# Ensure you have 'llama3' (or switch to 'mistral', etc.) pulled via 'ollama run llama3'
-MODEL_NAME = os.getenv("OLLAMA_MODEL")
-llm = ChatOllama(model=MODEL_NAME, temperature=0.7)
+nvidia_model = os.getenv("NVIDIA_MODEL", "meta/llama-3.1-70b-instruct")
+nvidia_api_key = os.getenv("NVIDIA_API_KEY")
+
+if nvidia_api_key:
+    llm = ChatNVIDIA(
+        model=nvidia_model,
+        api_key=nvidia_api_key,
+        temperature=0.7
+    )
+else:
+    print("⚠️ WARNING: NVIDIA_API_KEY is not set. Please update your .env file.")
+    llm = None
 
 # Search Tools
 from duckduckgo_search import DDGS
@@ -90,6 +99,8 @@ def search_and_formulate_node(state: AppState):
     combined_result_set = f"WIKI:\n{wiki_result}\n\nWEB SEARCH:\n{search_result}"
 
     # LLM Request using structured output
+    if not llm:
+        raise Exception("AI model is not configured (missing NVIDIA_API_KEY).")
     structured_llm = llm.with_structured_output(ProjectSpec)
     
     prompt = f"""
@@ -120,6 +131,8 @@ def evaluate_feedback_node(state: AppState):
 def process_feedback_node(state: AppState):
     print("[process_feedback_node] Starting...")
     # Re-evaluate
+    if not llm:
+        raise Exception("AI model is not configured (missing NVIDIA_API_KEY).")
     structured_llm = llm.with_structured_output(ProjectSpec)
     
     prompt = f"""

@@ -1,5 +1,5 @@
 # IdeaXCoder Project Context (Claude)
-Next.js acts as the primary visual display renderer, integrated directly into the project root. The UI follows an **"Architectural Brutalism"** and **"Digital Sculptor"** aesthetic—monochromatic, structured, and premium. It utilizes Vanilla CSS for all styling, combined with Framer Motion and React Three Fiber to create a high-fidelity 3D command center.
+Next.js acts as the primary visual display renderer, integrated directly into the project root. The UI follows an **"Architectural Brutalism"** and **"Digital Sculptor"** aesthetic—monochromatic, structured, and premium. It utilizes Vanilla CSS for all styling, combined with Framer Motion and React Three Fiber to create a high-fidelity 3D command center. The intelligence is powered by NVIDIA NIM (meta/llama-3.1-70b-instruct).
 
 ## Frontend Requirements
 - **3D Command Center:** A technical architect dashboard that feels alive and responsive.

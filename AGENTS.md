@@ -1,12 +1,12 @@
 # IdeaXCoder Project Context (Agents)
-The backend architecture resides in `backend/main.py` and connects to Ollama alongside Web Search Tools and Wikipedia search agents. Agent state is strictly managed using an `AppState` TypedDict in Python, ensuring persistent context throughout the architectural planning process.
+The backend architecture resides in `backend/main.py` and connects to NVIDIA NIM alongside Web Search Tools and Wikipedia search agents. Agent state is strictly managed using an `AppState` TypedDict in Python, ensuring persistent context throughout the architectural planning process.
 
 ## Agent Architecture & Workflow
 - **LangGraph Integration:** Orchestrates the flow between requirement gathering, research, and specification generation.
 - **Research Capabilities:** Employs specialized agents to crawl the web and Wikipedia for technical documentation and best practices.
 - **Architect Core:** Synthesizes gathered data into comprehensive, structured technical specifications (Blueprints).
 - **Human-in-the-Loop:** Pause/Resume capability allows users to refine the agent's direction before moving to the next phase.
-- **Environment Configuration:** Requires `OLLAMA_MODEL` (e.g., `OLLAMA_MODEL="nemotron-mini:latest"`) in the root `.env` file to correctly route requests to the local inference engine.
+- **Environment Configuration:** Requires `NVIDIA_API_KEY` and `NVIDIA_MODEL` (e.g., `meta/llama-3.1-70b-instruct`) in the root `.env` file to correctly route requests to the NVIDIA inference engine.
 
 ---
 
