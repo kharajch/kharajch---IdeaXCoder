@@ -1,18 +1,21 @@
 import os
 import uuid
-from typing import List, Optional, Literal
+import json
+import asyncio
+from typing import List, Optional, Literal, AsyncGenerator
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
-# from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_community.tools.wikipedia.tool import WikipediaQueryRun
 from langchain_community.utilities.wikipedia import WikipediaAPIWrapper
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
+from typing_extensions import TypedDict
 
 # Load Environment Variables
 load_dotenv()
@@ -56,8 +59,6 @@ wiki_wrapper = WikipediaAPIWrapper(top_k_results=1, doc_content_chars_max=1000)
 wiki_tool = WikipediaQueryRun(api_wrapper=wiki_wrapper)
 
 # State Definition
-from typing_extensions import TypedDict
-
 class ProjectSpec(BaseModel):
     objective: str = Field(description="Objective")
     tech_stack: List[str] = Field(description="Tech Stack")
@@ -71,18 +72,30 @@ class ProjectSpec(BaseModel):
 class AppState(TypedDict):
     input_data: dict
     combined_result_set: str
-    spec: Optional[ProjectSpec]
+    spec: Optional[dict]
     pending_feedback: bool
     feedback: Optional[str]
     is_satisfactory: bool
     think_log: List[str]
 
+# Helper to parse JSON from a string that might contain other text (like <thought> blocks)
+def parse_spec_from_text(text: str) -> Optional[dict]:
+    try:
+        # Look for the first '{' and last '}'
+        start = text.find('{')
+        end = text.rfind('}')
+        if start != -1 and end != -1:
+            json_str = text[start:end+1]
+            return json.loads(json_str)
+    except Exception:
+        pass
+    return None
+
 # Graph Nodes
-def search_and_formulate_node(state: AppState):
-    print("[search_and_formulate_node] Starting...")
+async def search_and_formulate_node(state: AppState):
     data = state["input_data"]
     
-    # Optional search steps to enrich the prompt
+    # Optional search steps
     query = f"{data.get('problem_statement', '')} {data.get('solution', '')}"
     wiki_result = ""
     search_result = ""
@@ -98,79 +111,87 @@ def search_and_formulate_node(state: AppState):
 
     combined_result_set = f"WIKI:\n{wiki_result}\n\nWEB SEARCH:\n{search_result}"
 
-    # LLM Request using structured output
     if not llm:
-        raise Exception("AI model is not configured (missing NVIDIA_API_KEY).")
-    structured_llm = llm.with_structured_output(ProjectSpec)
-    
+        raise Exception("AI model is not configured.")
+
     prompt = f"""
-    You are an expert Software Architect. Using the following user requirements and context, build a technical specification.
+    You are an expert Software Architect. 
+    First, brainstorm and "think" about the architecture in detail inside <thought> tags. 
+    Then, provide the final technical specification in JSON format matching the schema below.
+    
+    SCHEMA:
+    {json.dumps(ProjectSpec.model_json_schema(), indent=2)}
+    
     User Requirements: {data}
     Additional Context from Web Info: {combined_result_set}
-    Formulate the project architecture.
+    
+    Output format:
+    <thought>
+    Your detailed reasoning here...
+    </thought>
+    {{
+      "objective": "...",
+      ...
+    }}
     """
     
-    spec = structured_llm.invoke([HumanMessage(content=prompt)])
+    full_content = ""
+    async for chunk in llm.astream([HumanMessage(content=prompt)]):
+        full_content += chunk.content
     
+    spec = parse_spec_from_text(full_content)
+    
+    # Extract thought for the log
+    thought = "Generated initial specification."
+    if "<thought>" in full_content and "</thought>" in full_content:
+        thought_content = full_content.split("<thought>")[1].split("</thought>")[0].strip()
+        thought = f"Thinking complete: {thought_content[:200]}..."
+
     return {
         "spec": spec, 
         "combined_result_set": combined_result_set, 
         "pending_feedback": True,
-        "think_log": ["Used web/wiki tools.", "Generated initial spec.", "Waiting for feedback."]
+        "think_log": state.get("think_log", []) + [thought]
     }
 
-def evaluate_feedback_node(state: AppState):
-    print("[evaluate_feedback_node] Starting...")
-    is_sat = state.get("is_satisfactory", True)
-    if is_sat:
-        return {"pending_feedback": False, "think_log": ["User is satisfied. Terminating process."]}
-    
-    # If not satisfied
-    return {"think_log": ["User provided feedback. Need to parse and re-formulate."]}
-
-def process_feedback_node(state: AppState):
-    print("[process_feedback_node] Starting...")
-    # Re-evaluate
+async def process_feedback_node(state: AppState):
     if not llm:
-        raise Exception("AI model is not configured (missing NVIDIA_API_KEY).")
-    structured_llm = llm.with_structured_output(ProjectSpec)
+        raise Exception("AI model is not configured.")
     
     prompt = f"""
     You are an expert Software Architect. You previously built this spec:
-    {state['spec']}
+    {json.dumps(state['spec'], indent=2)}
     
     The user provided the following feedback because they were NOT satisfied:
     {state['feedback']}
     
-    Please incorporate the feedback and provide a NEW, updated technical specification.
+    Please incorporate the feedback. 
+    First, think about the changes in detail inside <thought> tags.
+    Then, provide a NEW, updated technical specification in JSON format.
+    
+    SCHEMA:
+    {json.dumps(ProjectSpec.model_json_schema(), indent=2)}
     """
     
-    spec = structured_llm.invoke([HumanMessage(content=prompt)])
+    full_content = ""
+    async for chunk in llm.astream([HumanMessage(content=prompt)]):
+        full_content += chunk.content
+        
+    spec = parse_spec_from_text(full_content)
+    
+    thought = "Re-generated spec based on feedback."
+    if "<thought>" in full_content and "</thought>" in full_content:
+        thought_content = full_content.split("<thought>")[1].split("</thought>")[0].strip()
+        thought = f"Thinking complete: {thought_content[:200]}..."
+
     return {
         "spec": spec,
         "pending_feedback": True, 
         "feedback": None,
-        "think_log": ["Re-generated spec based on feedback.", "Waiting for feedback."]
+        "think_log": state.get("think_log", []) + [thought]
     }
 
-# Edges
-def route_after_eval(state: AppState):
-    if state.get("is_satisfactory", True):
-        return END
-    return "process_feedback"
-
 # Build Graph
-workflow = StateGraph(AppState)
-workflow.add_node("search_and_formulate", search_and_formulate_node)
-workflow.add_node("evaluate_feedback", evaluate_feedback_node)
-workflow.add_node("process_feedback", process_feedback_node)
-
-workflow.add_edge(START, "search_and_formulate")
-workflow.add_edge("search_and_formulate", END) # The process stops conceptually here to wait for user if via API we pause. 
-# Re-mapping for single-pass API where Human-in-loop is just sequential API calls:
-# Actually we can't pause the graph cleanly without checkpoints and 'interrupt_before'. 
-# We'll use interrupt.
-
 workflow_with_human = StateGraph(AppState)
 workflow_with_human.add_node("search_and_formulate", search_and_formulate_node)
 workflow_with_human.add_node("process_feedback", process_feedback_node)
@@ -191,6 +212,7 @@ app_graph = workflow_with_human.compile(
     interrupt_after=["search_and_formulate", "process_feedback"]
 )
 
+# Models
 class ResearchRequest(BaseModel):
     problem_statement: str
     solution: str
@@ -204,30 +226,41 @@ class FeedbackRequest(BaseModel):
     is_satisfactory: bool
     feedback: Optional[str] = None
 
+# API Endpoints
 @app.post("/research")
 async def research_api(req: ResearchRequest):
     thread_id = str(uuid.uuid4())
     config = {"configurable": {"thread_id": thread_id}}
     
-    input_data = req.dict()
     initial_state = {
-        "input_data": input_data,
+        "input_data": req.dict(),
         "pending_feedback": False,
         "is_satisfactory": False,
         "think_log": ["Initializing research agent..."]
     }
     
-    # Run the graph until the interrupt
-    app_graph.invoke(initial_state, config=config)
-    
-    state = app_graph.get_state(config).values
-    
-    return {
-        "thread_id": thread_id,
-        "spec": state.get("spec"),
-        "think_log": state.get("think_log"),
-        "status": "pending_feedback"
-    }
+    async def stream_generator():
+        # Use astream_events to capture tokens
+        async for event in app_graph.astream_events(initial_state, config=config, version="v2"):
+            kind = event["event"]
+            if kind == "on_chat_model_stream":
+                content = event["data"]["chunk"].content
+                if content:
+                    yield f"data: {json.dumps({'type': 'token', 'content': content})}\n\n"
+            elif kind == "on_node_start":
+                yield f"data: {json.dumps({'type': 'log', 'content': f'Running node: {event['name']}'})}\n\n"
+
+        # Final state retrieval
+        state = app_graph.get_state(config).values
+        yield f"data: {json.dumps({
+            'type': 'final', 
+            'thread_id': thread_id, 
+            'spec': state.get('spec'),
+            'think_log': state.get('think_log'),
+            'status': 'pending_feedback'
+        })}\n\n"
+
+    return StreamingResponse(stream_generator(), media_type="text/event-stream")
 
 @app.post("/feedback")
 async def feedback_api(req: FeedbackRequest):
@@ -236,22 +269,34 @@ async def feedback_api(req: FeedbackRequest):
     # Update State with feedback
     app_graph.update_state(config, {"feedback": req.feedback, "is_satisfactory": req.is_satisfactory})
     
-    # Resume the graph
-    app_graph.invoke(None, config=config)
-    state = app_graph.get_state(config).values
-    
-    if req.is_satisfactory:
-        return {
-            "status": "completed",
-            "spec": state.get("spec"),
-            "think_log": ["User approved the specification. Finishing process."]
-        }
-    else:
-        return {
-            "status": "pending_feedback",
-            "spec": state.get("spec"),
-            "think_log": state.get("think_log")
-        }
+    async def stream_generator():
+        # Resume the graph
+        async for event in app_graph.astream_events(None, config=config, version="v2"):
+            kind = event["event"]
+            if kind == "on_chat_model_stream":
+                content = event["data"]["chunk"].content
+                if content:
+                    yield f"data: {json.dumps({'type': 'token', 'content': content})}\n\n"
+            elif kind == "on_node_start":
+                yield f"data: {json.dumps({'type': 'log', 'content': f'Resuming at node: {event['name']}'})}\n\n"
+
+        state = app_graph.get_state(config).values
+        if req.is_satisfactory:
+            yield f"data: {json.dumps({
+                'type': 'final',
+                'status': 'completed',
+                'spec': state.get('spec'),
+                'think_log': state.get('think_log')
+            })}\n\n"
+        else:
+            yield f"data: {json.dumps({
+                'type': 'final',
+                'status': 'pending_feedback',
+                'spec': state.get('spec'),
+                'think_log': state.get('think_log')
+            })}\n\n"
+
+    return StreamingResponse(stream_generator(), media_type="text/event-stream")
 
 if __name__ == "__main__":
     import uvicorn

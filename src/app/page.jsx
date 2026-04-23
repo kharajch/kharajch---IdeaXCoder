@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, TorusKnot } from "@react-three/drei";
@@ -48,6 +47,7 @@ export default function IdeaXCoder() {
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [threadId, setThreadId] = useState(null);
   const [logs, setLogs] = useState([]);
+  const [streamingTokens, setStreamingTokens] = useState("");
   const [currentSpec, setCurrentSpec] = useState(null);
   const [pendingFeedback, setPendingFeedback] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState("");
@@ -76,18 +76,66 @@ export default function IdeaXCoder() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const processStream = async (response) => {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          try {
+            const data = JSON.parse(line.substring(6));
+            if (data.type === "token") {
+              setStreamingTokens((prev) => prev + data.content);
+            } else if (data.type === "log") {
+              setLogs((prev) => [...prev, data.content]);
+              setStreamingTokens(""); // Clear tokens on new log
+            } else if (data.type === "final") {
+              setThreadId(data.thread_id || threadId);
+              setLogs(data.think_log || []);
+              setStreamingTokens("");
+              setCurrentSpec(data.spec);
+              
+              if (data.status === "pending_feedback") {
+                setPendingFeedback(true);
+              } else if (data.status === "completed") {
+                setPendingFeedback(false);
+                setLogs((prev) => [...prev, "Process completed!"]);
+                saveHistory({
+                  id: data.thread_id || threadId,
+                  timestamp: new Date().toISOString(),
+                  title: formData.problem_statement.substring(0, 30) + "...",
+                  spec: data.spec
+                });
+              }
+            }
+          } catch (e) {
+            console.error("Error parsing stream chunk:", e);
+          }
+        }
+      }
+    }
+  };
+
   const submitResearch = async () => {
     setIsEvaluating(true);
-    setLogs(["Submitting research payload to backend..."]);
+    setLogs(["Submitting research payload..."]);
+    setStreamingTokens("");
     try {
-      const res = await axios.post(`${API_URL}/research`, formData);
-      setThreadId(res.data.thread_id);
-      setLogs((prev) => [...prev, ...(res.data.think_log || [])]);
-      
-      if (res.data.status === "pending_feedback") {
-        setCurrentSpec(res.data.spec);
-        setPendingFeedback(true);
-      }
+      const res = await fetch(`${API_URL}/research`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+      await processStream(res);
     } catch (err) {
       setLogs((prev) => [...prev, `ERROR: ${err.message}`]);
     } finally {
@@ -99,31 +147,20 @@ export default function IdeaXCoder() {
     if (!threadId) return;
     setIsEvaluating(true);
     setLogs((prev) => [...prev, isSatisfactory ? "Approving Spec..." : "Submitting Feedback..."]);
+    setStreamingTokens("");
     
     try {
-      const res = await axios.post(`${API_URL}/feedback`, {
-        thread_id: threadId,
-        is_satisfactory: isSatisfactory,
-        feedback: isSatisfactory ? null : feedbackMsg
+      const res = await fetch(`${API_URL}/feedback`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          thread_id: threadId,
+          is_satisfactory: isSatisfactory,
+          feedback: isSatisfactory ? null : feedbackMsg
+        })
       });
-
-      setLogs((prev) => [...prev, ...(res.data.think_log || [])]);
-      setCurrentSpec(res.data.spec);
-
-      if (res.data.status === "completed") {
-        setPendingFeedback(false);
-        setLogs((prev) => [...prev, "Process completed explicitly!"]);
-        // Save to History
-        saveHistory({
-          id: threadId,
-          timestamp: new Date().toISOString(),
-          title: formData.problem_statement.substring(0, 30) + "...",
-          spec: res.data.spec
-        });
-      } else {
-        // Still pending
-        setFeedbackMsg("");
-      }
+      await processStream(res);
+      setFeedbackMsg("");
     } catch (err) {
       setLogs((prev) => [...prev, `ERROR: ${err.message}`]);
     } finally {
@@ -138,6 +175,7 @@ export default function IdeaXCoder() {
     });
     setThreadId(null);
     setLogs([]);
+    setStreamingTokens("");
     setCurrentSpec(null);
     setPendingFeedback(false);
   };
@@ -289,19 +327,24 @@ export default function IdeaXCoder() {
             <FiCommand /> Thinking Process
           </h3>
           
-          <div style={{ flex: 1 }}>
-            {logs.map((log, i) => (
+          <div style={{ flex: 1, maxHeight: "400px", overflowY: "auto", display: "flex", flexDirection: "column-reverse" }}>
+            {streamingTokens && (
+              <div className="log-entry" style={{ color: "#00ffcc", fontStyle: "italic", borderLeft: "2px solid #00ffcc", paddingLeft: "8px", marginBottom: "8px" }}>
+                &gt; {streamingTokens}
+              </div>
+            )}
+            {logs.slice().reverse().map((log, i) => (
               <div key={i} className="log-entry">&gt; {log}</div>
             ))}
             
-            {isEvaluating && <div className="log-entry pulse">&gt; Processing...</div>}
+            {isEvaluating && !streamingTokens && <div className="log-entry pulse">&gt; Processing...</div>}
           </div>
 
           {currentSpec && (
             <div className="spec-container glass-panel" style={{ marginTop: "16px" }}>
               <h4 style={{ marginBottom: "8px", color: "white" }}>Current Specification</h4>
               <div style={{ maxHeight: "400px", overflowY: "auto" }}>
-                <pre>{JSON.stringify(currentSpec, null, 2)}</pre>
+                <pre style={{ fontSize: "12px" }}>{JSON.stringify(currentSpec, null, 2)}</pre>
               </div>
             </div>
           )}
