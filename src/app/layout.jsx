@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "kharajch---IdeaXCoder",
-  description: "AI Agentic Web Application",
+  title: "kharajch---IdeaXCoder | AI-Powered Project Specification Generator",
+  description: "A sophisticated agentic AI coding interface designed to transform abstract project ideas into structured technical specifications --- Created by Kharaj Chakraborty (@kharajch)",
 };
 
 export default function RootLayout({ children }) {
