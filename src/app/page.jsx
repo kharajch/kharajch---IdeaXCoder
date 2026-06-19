@@ -35,12 +35,7 @@ function Background3D() {
 export default function IdeaXCoder() {
   // State for forms
   const [formData, setFormData] = useState({
-    problem_statement: "",
-    solution: "",
-    implementation: "",
-    features: "",
-    constraints: "",
-    expectations: ""
+    idea: ""
   });
 
   // Flow State
@@ -122,7 +117,7 @@ export default function IdeaXCoder() {
                 saveHistory({
                   id: data.thread_id || threadId,
                   timestamp: new Date().toISOString(),
-                  title: formData.problem_statement.substring(0, 30) + "...",
+                  title: (formData.idea || "").substring(0, 30) + "...",
                   spec: data.spec
                 });
               }
@@ -188,8 +183,7 @@ export default function IdeaXCoder() {
 
   const startNew = () => {
     setFormData({
-      problem_statement: "", solution: "", implementation: "",
-      features: "", constraints: "", expectations: ""
+      idea: ""
     });
     setThreadId(null);
     setLogs([]);
@@ -254,41 +248,18 @@ export default function IdeaXCoder() {
             </button>
           </div>
 
-          <div className="form-grid">
-            <Tilt tiltMaxAngleX={5} tiltMaxAngleY={5} scale={1.02}>
-              <div className="chatbox-card glass-panel">
-                <label>1. Problem Statement</label>
-                <textarea rows={3} name="problem_statement" value={formData.problem_statement} onChange={handleInputChange} placeholder="What problem are you solving?" />
-              </div>
-            </Tilt>
-            <Tilt tiltMaxAngleX={5} tiltMaxAngleY={5} scale={1.02}>
-              <div className="chatbox-card glass-panel">
-                <label>2. Proposed Solution</label>
-                <textarea rows={3} name="solution" value={formData.solution} onChange={handleInputChange} placeholder="How are you solving it?" />
-              </div>
-            </Tilt>
-            <Tilt tiltMaxAngleX={5} tiltMaxAngleY={5} scale={1.02}>
-              <div className="chatbox-card glass-panel">
-                <label>3. Implementation Plan</label>
-                <textarea rows={3} name="implementation" value={formData.implementation} onChange={handleInputChange} placeholder="Step by step approach?" />
-              </div>
-            </Tilt>
-            <Tilt tiltMaxAngleX={5} tiltMaxAngleY={5} scale={1.02}>
-              <div className="chatbox-card glass-panel">
-                <label>4. Key Features</label>
-                <textarea rows={3} name="features" value={formData.features} onChange={handleInputChange} placeholder="Detailed list of features" />
-              </div>
-            </Tilt>
-            <Tilt tiltMaxAngleX={5} tiltMaxAngleY={5} scale={1.02}>
-              <div className="chatbox-card glass-panel">
-                <label>5. Constraints & Edge Cases</label>
-                <textarea rows={3} name="constraints" value={formData.constraints} onChange={handleInputChange} placeholder="Known limitations?" />
-              </div>
-            </Tilt>
-            <Tilt tiltMaxAngleX={5} tiltMaxAngleY={5} scale={1.02}>
-              <div className="chatbox-card glass-panel">
-                <label>6. Expectations</label>
-                <textarea rows={3} name="expectations" value={formData.expectations} onChange={handleInputChange} placeholder="Acceptance criteria?" />
+          <div style={{ display: "flex", justifyContent: "center", marginTop: "24px" }}>
+            <Tilt tiltMaxAngleX={3} tiltMaxAngleY={3} scale={1.01} style={{ width: "100%", maxWidth: "800px" }}>
+              <div className="chatbox-card glass-panel" style={{ width: "100%" }}>
+                <label style={{ fontSize: "16px", color: "var(--accent)" }}>Idea Description</label>
+                <textarea 
+                  rows={8} 
+                  name="idea" 
+                  value={formData.idea} 
+                  onChange={handleInputChange} 
+                  placeholder="Describe your idea" 
+                  style={{ width: "100%", minHeight: "200px", fontSize: "16px", lineHeight: "1.6" }}
+                />
               </div>
             </Tilt>
           </div>

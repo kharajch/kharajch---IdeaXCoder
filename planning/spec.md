@@ -8,7 +8,7 @@ I Want To Build A Web Application That Will Have A Chat Interface To Interact Wi
 
 # Functional Requirements
 
-1. I Need A Frontend Which Will Have Multiple Chatboxes To Interact With The LLM To Build The Project With The Proper Tech Stack And Architecture From A Prompt Of Rough Idea Of The Project Given To The LLM. The LLM Will Ask Questions To The User To Gather More Information About The Project And Will Build The Project With The Proper Tech Stack And Architecture. The LLM Will Also Provide The User With The Proper Tech Stack And Architecture For The Project.
+1. I Need A Frontend Which Will Have a single unified chatbox to Interact With The LLM To Build The Project With The Proper Tech Stack And Architecture From A Prompt Of Rough Idea Of The Project Given To The LLM. The LLM Will Ask Questions To The User To Gather More Information About The Project And Will Build The Project With The Proper Tech Stack And Architecture. The LLM Will Also Provide The User With The Proper Tech Stack And Architecture For The Project.
 2. It Will Be An AI Powered Application Which Will Use LLM To Answer The Questions.
 3. I Will Need A Backend Endpoint To Handle The Requests From The Frontend And Send The Responses To The Frontend.
 4. Frontend Will Submit A Post Request To The Backend Endpoint With The Prompt Of Rough Idea Of The Project.

@@ -96,7 +96,7 @@ async def search_and_formulate_node(state: AppState):
     data = state["input_data"]
     
     # Optional search steps
-    query = f"{data.get('problem_statement', '')} {data.get('solution', '')}"
+    query = data.get('idea', '')
     wiki_result = ""
     search_result = ""
     if len(query) > 10:
@@ -122,7 +122,7 @@ async def search_and_formulate_node(state: AppState):
     SCHEMA:
     {json.dumps(ProjectSpec.model_json_schema(), indent=2)}
     
-    User Requirements: {data}
+    User Requirements: {data.get('idea', '')}
     Additional Context from Web Info: {combined_result_set}
     
     Output format:
@@ -214,12 +214,7 @@ app_graph = workflow_with_human.compile(
 
 # Models
 class ResearchRequest(BaseModel):
-    problem_statement: str
-    solution: str
-    implementation: str
-    features: str
-    constraints: str
-    expectations: str
+    idea: str
 
 class FeedbackRequest(BaseModel):
     thread_id: str

@@ -32,14 +32,8 @@
 # Architecture
 
     1. The web application will have a frontend and a backend.
-    2. The frontend will have multiple chatboxes to ask questions to the LLM.
-            a. Chatbox asking for the problem statement.
-            b. What do you think is the solution for this problem statement?
-            c. What do you want to implement as the solution give a descriptive overview of the solution step by step.
-            d. What type of features do you want to implement in the application give a detailed list of features?
-            e. What will be the input, output, what to process, what to give result as output give a descriptive answer.
-            f. What will be the constraints and edge cases for the project give a descriptive answer.
-            g. What is your expectation from this project? What do you want to implement as the final result? What will make the final output as satisfactory to you? What is the acceptance criteria for this project?
+    2. The frontend will have a single unified chatbox asking the user to "Describe your idea".
+    3. The backend will process this unified input and send it to the agent, which generates the structured architectural blueprint.
     
     3. The backend will have an endpoint to handle the requests from the frontend and send the responses to the frontend.
     4. The frontend will submit a post request to the backend endpoint with the question.
