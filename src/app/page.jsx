@@ -7,7 +7,7 @@ import { OrbitControls, TorusKnot } from "@react-three/drei";
 import Tilt from "react-parallax-tilt";
 import { FiSearch, FiMessageSquare, FiCommand, FiRefreshCw, FiCopy, FiCheck, FiX, FiMaximize2 } from "react-icons/fi";
 
-const API_URL = "/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 // --- 3D Background Component ---
 function Background3D() {

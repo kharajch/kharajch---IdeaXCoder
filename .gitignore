@@ -44,3 +44,7 @@ venv/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# testing output
+test-results/
+.pytest_cache/
