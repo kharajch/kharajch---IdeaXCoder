@@ -114,6 +114,34 @@ The frontend provides the interactive 3D command center.
 
 ---
 
+### 🧪 Testing Suite
+
+IdeaXCoder features integrated unit and E2E testing systems. Playwright handles automated dev server lifecycles during test executions.
+
+#### 1. Backend Tests (Pytest)
+Run pytest inside the virtual environment:
+```bash
+# Activation (if not done)
+.\venv\Scripts\activate
+
+# Execute pytest on backend mock states
+npm run test:backend
+# (Or manually: pytest test/test_backend.py)
+```
+
+#### 2. End-to-End Tests (Playwright)
+Run the E2E suites which simulate full user interactions (submitting ideas, rejecting specifications, providing feedback loop adjustments, and visual overlay validation):
+```bash
+# Execute Playwright E2E tests
+npm run test:e2e
+
+# Run Playwright test runner UI (interactive debugging)
+npm run test:e2e:ui
+```
+
+---
+
+
 ## 🎨 Branding & Identity
 
 IdeaXCoder follows a **Digital Sculptor** aesthetic—monochromatic, structured, and premium.

@@ -7,6 +7,8 @@ The backend architecture resides in `backend/main.py` and connects to NVIDIA NIM
 - **Architect Core:** Synthesizes gathered data into comprehensive, structured technical specifications (Blueprints).
 - **Human-in-the-Loop:** Pause/Resume capability allows users to refine the agent's direction before moving to the next phase.
 - **Environment Configuration:** Requires `NVIDIA_API_KEY` and `NVIDIA_MODEL` (e.g., `meta/llama-3.1-70b-instruct`) in the root `.env` file to correctly route requests to the NVIDIA inference engine.
+- **Error Handling Standards:** Any failure or non-2xx status returned by FastAPI endpoints (like LLM configuration or NIM timeout errors) must be explicitly thrown as descriptive JavaScript Errors by the frontend client and logged in the right-hand thinking pad, ensuring transparency during agent executions.
+
 
 ---
 
